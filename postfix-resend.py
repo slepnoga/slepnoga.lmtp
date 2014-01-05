@@ -57,16 +57,17 @@ def send_email(send_from, send_to, subject, text, server="localhost",port=24):
 
     try:
         smtp = smtplib.LMTP(server, port)
+        w
         smtp.sendmail(send_from, send_to, msg.as_string())
         smtp.close()
     except:
-        syslog.syslog(syslog.LOR_ERR, "Error sending email: " ++ msg.as_string())
+        syslog.syslog(syslog.LOG_ERR, "Error sending email: " + msg.as_string())
 
 
 if useStdIn:
     # one message approach
     msg = rfc822.Message(sys.stdin)
-    t = os.read(sys.stdin)
+    t = sys.stdin.read()
     send_email(msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t))
 
 else:

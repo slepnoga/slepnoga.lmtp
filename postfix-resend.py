@@ -60,6 +60,7 @@ def send_email(send_from, send_to, subject, text, server="localhost"):
         smtp = smtplib.LMTP(server)
         smtp.sendmail(send_from, send_to, msg.as_string())
         smtp.close()
+        syslog.syslog(syslog.LOR_INFO, "Message sent: "+send_from+":"+subject)
     except Exception, ex:
         syslog.syslog(syslog.LOG_ERR, "Error sending email: " + str(ex) +"\nMessage:\n" + msg.as_string())
 

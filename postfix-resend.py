@@ -21,6 +21,7 @@
 # pipe is used to resend messages.
 # 
 #  useStdIn variable exists to differ between pipe and stdin functionallity
+#  app_name name of the application in syslog
 
 import smtplib, os, sys
 from email.MIMEMultipart import MIMEMultipart
@@ -37,8 +38,9 @@ import mailbox
 
 useStdIn=True
 socket="/var/spool/postfix/private/dovecot-lmtp"
+app_name="postfix_resend"
 
-def send_email(send_from, send_to, subject, text, server="localhost"):
+def send_email(msg, send_from, send_to, subject, text, server="localhost"):
     assert type(send_to)   == list
     
     msg = MIMEMultipart()
@@ -56,20 +58,21 @@ def send_email(send_from, send_to, subject, text, server="localhost"):
     part.add_header('Content-Disposition', 'attachment; filename="mail.email"')
     msg.attach(part)
 
+    log_line = app_name + " " + str(msg['message-id']) + " " + send_from + str(msg['to']) + "deliver"
     try:
         smtp = smtplib.LMTP(server)
         smtp.sendmail(send_from, send_to, msg.as_string())
         smtp.close()
-        syslog.syslog(syslog.LOR_INFO, "Message sent: "+send_from+":"+subject)
+        syslog.syslog(syslog.LOR_INFO, log_line + " OK")
     except Exception, ex:
-        syslog.syslog(syslog.LOG_ERR, "Error sending email: " + str(ex) +"\nMessage:\n" + msg.as_string())
+        syslog.syslog(syslog.LOG_ERR, log_line + "Error (" + str(ex) + ")" + "\nMessage:\n" + msg.as_string())
 
 
 if useStdIn:
     # one message approach
     msg = rfc822.Message(sys.stdin)
     t = sys.stdin.read()
-    send_email(msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
+    send_email(msg, msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
 
 else:
     # mailbox approach, should be used in pipe setup

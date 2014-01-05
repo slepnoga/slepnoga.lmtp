@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python2
 # Copyright: 2014 (C) Alexander Vershilov <alexander.vershilov@gmail.com>
 # License:  BSD
 

@@ -36,8 +36,9 @@ import mailbox
 
 
 useStdIn=True
+socket="/var/spool/postfix/private/dovecot-lmtp"
 
-def send_email(send_from, send_to, subject, text, server="localhost",port=24):
+def send_email(send_from, send_to, subject, text, server="localhost"):
     assert type(send_to)   == list
     
     msg = MIMEMultipart()
@@ -56,8 +57,7 @@ def send_email(send_from, send_to, subject, text, server="localhost",port=24):
     msg.attach(part)
 
     try:
-        smtp = smtplib.LMTP(server, port)
-        w
+        smtp = smtplib.LMTP(server)
         smtp.sendmail(send_from, send_to, msg.as_string())
         smtp.close()
     except:
@@ -68,10 +68,10 @@ if useStdIn:
     # one message approach
     msg = rfc822.Message(sys.stdin)
     t = sys.stdin.read()
-    send_email(msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t))
+    send_email(msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
 
 else:
     # mailbox approach, should be used in pipe setup
     box = mailbox.mbox("/path/to/pipe", None, False);
     for m in box:
-        send_email(m["From"],["root@thinkpad"], m["Subject"], str(m))
+        send_email(m["From"],["root@thinkpad"], m["Subject"], str(m), socket)

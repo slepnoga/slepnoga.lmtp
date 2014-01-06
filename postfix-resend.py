@@ -28,6 +28,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase 
 from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE, formatdate
+from email.parser import Parser
 from email import Encoders
 import syslog
 
@@ -70,9 +71,10 @@ def send_email(msg, send_from, send_to, subject, text, server="localhost"):
 
 if useStdIn:
     # one message approach
-    msg = rfc822.Message(sys.stdin)
-    t = sys.stdin.read()
-    send_email(msg, msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
+    msg = Parser().parse(sys.stdin)
+    while msg:
+        send_email(msg, msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
+        msg = Parser().parse(sys.stdin)
 
 else:
     # mailbox approach, should be used in pipe setup

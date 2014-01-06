@@ -38,7 +38,9 @@ import mailbox
 
 
 useStdIn=True
-socket="/var/spool/postfix/private/dovecot-lmtp"
+#socket="/var/spool/postfix/private/dovecot-lmtp"
+socket="127.0.0.1"
+
 app_name="postfix_resend"
 
 def send_email(msg, send_from, send_to, subject, text, server="localhost"):
@@ -61,10 +63,10 @@ def send_email(msg, send_from, send_to, subject, text, server="localhost"):
 
     log_line = app_name + " " + str(msg['message-id']) + " " + send_from + str(msg['to']) + "deliver"
     try:
-        smtp = smtplib.LMTP(server)
+        smtp = smtplib.LMTP(server,24)
         smtp.sendmail(send_from, send_to, msg.as_string())
         smtp.close()
-        syslog.syslog(syslog.LOR_INFO, log_line + " OK")
+        syslog.syslog(syslog.LOG_INFO, log_line + " OK")
     except Exception, ex:
         syslog.syslog(syslog.LOG_ERR, log_line + "Error (" + str(ex) + ")" + "\nMessage:\n" + msg.as_string())
 
@@ -73,7 +75,7 @@ if useStdIn:
     # one message approach
     msg = Parser().parse(sys.stdin)
     while msg:
-        send_email(msg, msg["from"],["root@thinkpad"], msg["Subject"], str(msg) + str(t), socket)
+        send_email(msg, msg["from"],["crm@polipaks.com"], msg["Subject"], str(msg), socket)
         msg = Parser().parse(sys.stdin)
 
 else:
